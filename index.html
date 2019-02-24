@@ -1,87 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
     <link
-      href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"
       rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
     />
-    <title>Chat NodeJS</title>
+    <title>NodeJS chat</title>
+
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
       body {
-        margin-bottom: 280px;
-        font: 13px Helvetica, Arial;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 1600 900'%3E%3Cpath fill='%23f6ded4' d='M0 504 0 899 1600 899 1600 120z'/%3E%3Cpath fill='%23e0cbc1' d='M1600 567 1600 899 0 899 0 165z'/%3E%3Cpath fill='%23854e4b' d='M0 680 0 899 1600 899 1600 300z'/%3E%3Cpath fill='%23b06763' d='M1600 719 1600 899 0 899 0 353z'/%3E%3Cpath fill='%23482426' d='M0 788 0 899 1600 899 1600 625z'/%3E%3C/svg%3E");
-        background-size: cover;
-        background-position: center;
+        background: #fcfcfc;
       }
-      form {
-        background: #000;
-        padding: 15px;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-      }
-      form input {
-        border: 0;
-        padding: 10px;
-        width: 90%;
-        margin-right: 0.5%;
-      }
-      form button {
-        width: 9.5%;
-        background: rgb(130, 224, 255);
-        border: none;
-        padding: 10px;
-      }
-      #messages {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-      }
-      #messages li {
-        padding: 10px 10px;
-        font-size: 20px;
-      }
-      #messages li:nth-child(odd) {
-        background: #eee;
-      }
-      #messages_container {
-        height: 350px;
-        overflow-y: auto;
+
+      #all_mess {
         border: 1px solid #dedede;
-        padding: 10px;
-        margin-top: 50px;
-        margin-left: 50px;
-        margin-right: 50px;
+        margin-top: 30px;
+        width: 500px;
+        height: 600px;
+      }
+
+      #messForm {
+        margin-top: 30px;
       }
     </style>
   </head>
   <body>
-    <div id="messages_container"><ul id="messages"></ul></div>
+    <div class="container">
+      <div class="py-5 text-center">
+        <h2>Chat NodeJs</h2>
+        <p class="lead">Enter your name and start messaging</p>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          <h3>Message form</h3>
+          <form id="messForm" class="shadow p-3 mb-5 bg-white rounded">
+            <label for="name">Name</label>
+            <input
+              type="text"
+              name="name"
+              id="name"
+              placeholder="Enter name"
+              class="form-control"
+            />
+            <br />
+            <label for="message">Message</label>
+            <textarea
+              name="message"
+              id="message"
+              class="form-control"
+              placeholder="Enter message"
+            ></textarea>
+            <br />
+            <input
+              type="submit"
+              value="Send"
+              class="btn btn-primary btn-lg btn-block"
+            />
+          </form>
+        </div>
+        <div class="col-6">
+          <h3>Messages</h3>
 
-    <form action="">
-      <input id="m" autocomplete="off" /><button class="btn btn-primary btn-lg">
-        Send msg
-      </button>
-    </form>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
-    <script src="//code.jquery.com/jquery-1.11.1.js"></script>
+          <div id="all_mess" class="shadow p-3 mb-5 bg-white rounded"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
     <script>
-      var socket = io();
-      $("form").submit(function() {
-        socket.emit("chat message", $("#m").val());
-        $("#m").val("");
-        return false;
-      });
-      socket.on("chat message", function(msg) {
-        $("#messages").append(
-          $("<li>").text(new Date().toLocaleTimeString() + " " + msg)
-        );
+      $(function() {
+        var socket = io.connect();
+        var $form = $("#messForm");
+        var $textarea = $("#message");
+        var $all_message = $("#all_mess");
+        var $name = $("#name");
+        var date = new Date().toLocaleTimeString();
+
+        $form.submit(event => {
+          event.preventDefault();
+          socket.emit("send mess", {
+            mess: $textarea.val(),
+            name: $name.val()
+          });
+          $textarea.val("");
+        });
+
+        socket.on("add mess", data => {
+          $all_message.append(
+            "<div><b>" +
+              "[" +
+              date +
+              "]" +
+              " " +
+              data.name +
+              "</b>: " +
+              data.mess +
+              "</div>"
+          );
+        });
       });
     </script>
   </body>
