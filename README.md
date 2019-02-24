@@ -6,3 +6,6 @@ Used technologies:
 - Express
 - Socket.IO
 - HTML, CSS
+- Bootstrap
+- jQuery
+
